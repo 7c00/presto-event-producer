@@ -137,32 +137,34 @@ class PrestoEventProducer
 
         private final String prefix;
         private final Map<String, String> config;
-        private final Properties properties;
 
         private KafkaProducerFactory(Map<String, String> config)
         {
             this.prefix = NAME + ".kafka.";
             this.config = config;
-            this.properties = new Properties();
-
-            properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-            properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        }
-
-        private void exchange(String key, String defaultValue)
-        {
-            properties.put(key, config.getOrDefault(prefix + key, defaultValue));
         }
 
         private KafkaProducer<String, String> create()
         {
-            requireNotBlank(config.get(prefix + "bootstrap.servers"), "Bootstrap servers not provided");
-            exchange("bootstrap.servers", "");
-            exchange("acks", "1");
-            exchange("retries", "3");
-            exchange("batch.size", "16384");
-            exchange("linger.ms", "1");
-            exchange("buffer.memory", "33554432");
+            requireNotBlank(config.get(prefix + "bootstrap.servers"), "bootstrap.servers not specified");
+
+            final Properties properties = new Properties();
+            properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+            properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+
+            final int prefixLen = prefix.length();
+            config.forEach((k, v) -> {
+                if (k.startsWith(prefix)) {
+                    String key = k.substring(prefixLen);
+                    switch (key) {
+                        case "key.serializer":
+                        case "value.serializer":
+                            break;
+                        default:
+                            properties.put(key, v);
+                    }
+                }
+            });
             return new KafkaProducer<>(properties);
         }
     }
