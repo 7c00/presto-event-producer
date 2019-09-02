@@ -74,6 +74,7 @@ public class TestPrestoEventProducer
         map.put(PrestoEventProducer.NAME + ".coordinator", "localhost:8080");
         map.put(PrestoEventProducer.NAME + ".topic", broker.getTopic());
         map.put(PrestoEventProducer.NAME + ".kafka.bootstrap.servers", broker.getAddress());
+        map.put(PrestoEventProducer.NAME + ".kafka.acks", "1");
         return map;
     }
 
