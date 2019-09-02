@@ -79,7 +79,7 @@ class PrestoEventProducer
             producer.send(new ProducerRecord<>(topic, value));
         }
         catch (Exception e) {
-            LOG.error("Sending event {} error", e);
+            LOG.error("Sending event {} error", event, e);
         }
     }
 
@@ -126,6 +126,18 @@ class PrestoEventProducer
             this.type = type;
             this.coordinator = coordinator;
         }
+
+        @Override
+        public String toString()
+        {
+            final StringBuilder sb = new StringBuilder("PrestoEventHolder{");
+            sb.append("time=").append(time);
+            sb.append(", event=").append(event);
+            sb.append(", type=").append(type);
+            sb.append(", coordinator='").append(coordinator).append('\'');
+            sb.append('}');
+            return sb.toString();
+        }
     }
 
     static class KafkaProducerFactory
@@ -165,7 +177,13 @@ class PrestoEventProducer
                     }
                 }
             });
-            return new KafkaProducer<>(properties);
+
+            // See https://stackoverflow.com/a/54118010
+            ClassLoader original = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(null);
+            KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
+            Thread.currentThread().setContextClassLoader(original);
+            return producer;
         }
     }
 }
