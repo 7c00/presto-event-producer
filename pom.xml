@@ -20,7 +20,7 @@
         </license>
     </licenses>
     <properties>
-        <dep.kafka.version>1.0.0</dep.kafka.version>
+        <dep.kafka.version>3.9.2</dep.kafka.version>
         <dep.presto.version>0.198</dep.presto.version>
         <dep.slice.version>0.33</dep.slice.version>
     </properties>
